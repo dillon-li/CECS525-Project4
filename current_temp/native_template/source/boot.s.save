@@ -1,0 +1,140 @@
+.set	Usr32md,	0x10
+.set	FIQ32md,	0x11
+.set	IRQ32md,	0x12
+.set	SVC32md,	0x13
+.set	Abt32md,	0x17
+.set	Und32md,	0x1B
+.set	Sys32md,	0x1F
+
+.set	I,		0x80
+.set	F,		0x40
+.set	NoInt,		0xC0
+
+.set	USR_Stack,	0x20000
+.set	IRQ_Stack,	0x8000
+.set	SVC_Stack,	IRQ_Stack - 128
+.section ".text.boot"
+.global Start
+/***********************************Reset***************************************/
+ 		B	reset
+		B	undef
+		B	swi
+		B	pabt	
+		B	dabt
+		B	na
+		B	irq
+		B	fiq
+reset:		LDR	r13, =SVC_Stack
+
+		MOV	r2, #IRQ32md|I			/*Initialize irq Stack Pointer*/
+		MSR 	cpsr_c, r2
+		LDR	r13, =IRQ_Stack
+							/*Initialize fiq Stack Pointer*/
+		MOV 	r2, #SYS32md
+		MSR	cpsr_c, r2			/*Initialize svc Stack Pointer*/
+		LDR	r13, #USR_Stack			/*r0 = CP15 reg 1 */
+		LDR	r1, =0x					/* clear V and VE bits */
+		MCR	p15, 0, r0, c1, c0			/*CP15 reg 1 = r0 */
+		LDR	r0, =0x0
+		LDR	r1, =Start
+		ORR	r1, r1, #0xEA000000
+		STR	r1, [r0]
+		LDR	r0, =0x4
+		LDR	r1, =un
+		ORR	r1, r1, #0xEA000000
+		STR	r1, [r0]
+		LDR	r0, =0x8
+		LDR	r1, =swi
+		ORR	r1, r1, #0xEA000000
+		STR	r1, [r0]
+		LDR	r0, =0xC
+		LDR	r1, =pa
+		ORR	r1, r1, #0xEA000000
+		STR	r1, [r0]
+		LDR	r0, =0x10
+		LDR	r1, =da
+		ORR	r1, r1, #0xEA000000
+		STR	r1, [r0]
+		LDR	r0, =0x14
+		LDR	r1, =res
+		ORR	r1, r1, #0xEA000000
+		STR	r1, [r0]
+		LDR	r0, =0x18
+		LDR	r1, =irq
+		ORR	r1, r1, #0xEA000000
+		STR	r1, [r0]
+		LDR	r0, =0x1C
+		LDR	r1, =fiq
+		ORR	r1, r1, #0xEA000000
+		STR	r1, [r0]
+		MRC	p15, 0, r0, c1, c0, 2			/*Initialize VPF Processor*/
+		ORR	r0, r0, #0x300000
+		ORR	r0, r0, #0xC00000
+		MCR	p15, 0, r0, c1, c0, 2
+		MOV	r0, #0x40000000
+		FMXR	fpexc, r0
+		B	kernel_main
+/***********************************Undefined****************************/		
+un:		PUSH	{r0-r12, lr}						/*How would you handle this exception?*/
+		B	kernel_main
+		POP	{r0-r12, lr}
+/**************************************Software Interrupt******************/		
+swi:		PUSH	{r0-r12, lr}						/*How would you handle this exception?*/
+		B	kernel_main
+		POP	{r0-r12, lr}
+/************************************Prefetch Abort**************************/
+pa:		PUSH	{r0-r12, lr}						/*How would you handle this exception?*/
+		B	kernel_main
+		POP	{r0-r12, lr}
+		SUBS	pc, lr, #4
+/*************************************Data Abort*******************************/	
+da:		PUSH	{r0-r12, lr}						/*How would you handle this exception?*/
+		B	kernel_main
+		POP	{r0-r12, lr}
+		SUBS	pc, lr, #8
+/**************************************Reserved**********************************/
+res:		NOP						/*How would you handle this exception?*/
+		B	kernel_main
+/**************************************Interrupt Request**************************/
+irq:		PUSH	{r0-r12, lr}		/*IRQ Handler, first save registers and return address to stack*/	
+	
+		BL	irq_handler		/*How would you handle this exception to process a UART0 received character?*/
+		
+		POP	{r0-r12, lr}		/*Restore registers from stack and return to application*/
+		SUBS	pc, lr, #4
+/**************************************Fast Interrupt Request**********************/
+fiq:		PUSH	{r0-r7, lr}		/*FIQ Handler, first save registers and return address to stack*/		
+		NOP				/*How would you handle this exception?*/
+		POP	{r0-r7, lr}		/*Restore registers from stack and return to application*/
+		SUBS	pc, lr, #4
+
+.section ".data"
+.global invar, outvar
+.set invar, 0
+.set outvar, 0
+
+.section ".text"
+
+.global reboot
+reboot:
+	LDR	pc, =0x0000
+
+.global enable_irq
+enable_irq:
+		CPSIE	I
+		BX lr
+		
+.global disable_irq
+disable_irq:
+		CPSID	I
+		BX lr
+
+.global enable_fiq
+enable_fiq:
+		CPSIE	F
+		BX lr
+		
+.global disable_fiq
+disable_fiq:
+		CPSID	F
+		BX lr
