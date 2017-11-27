@@ -40,7 +40,7 @@ uint8_t ones;
 uint8_t tens;
 char* tbuf;
 char* rbuf;
-char* cbuf = '\0';
+char cbuf = '\0';
 void kernel_main();             //prototypes
 void enable_arm_irq();
 void disable_arm_irq();
@@ -101,19 +101,16 @@ void enable_irq_52(void)
 
 void enable_1hz(void)
 {
-	uart_puts("\r\nbegin enable_1hz\r\n");
+	//uart_puts("\r\nbegin enable_1hz\r\n");
 	bcm2835_i2c_begin();
 	bcm2835_i2c_setClockDivider(BCM2835_I2C_CLOCK_DIVIDER_2500);
 	bcm2835_i2c_setSlaveAddress(0x68);
 	*ISCN[0] = 0x00;
 	// I2C address 0x68 is the DS3231
 	//mmio_write(0x68, 0x00000000);
-	uart_puts("I hate 525");
 	mmio_write(0xE, 0x00000000);
-	uart_puts("525 sucks");
 	//Psuedo Code Here: clear the INTCN (TY ROCKEY) bit in the DS3231M Control register
-	//bcm2835_delayMicroseconds(1000);
-	uart_puts("\r\nend enable_1hz\r\n");
+	bcm2835_delayMicroseconds(1000);
 	bcm2835_i2c_end();
 }
 
@@ -125,10 +122,9 @@ char read_char_buffer(void)
 	    //call alarm
 	    ALARM();
 	}*/
-	while (c == '\0') {c = *cbuf;}
+	while (c == '\0') {c = cbuf;}
 	//Psuedo Code Here: make cbuf = null
-	*cbuf = '\0'; //prolly not gonna work but who knows //it didn't work
-	//uart_puts(null);
+	cbuf = '\0'; //prolly not gonna work but who knows //it didn't work
 	return c;
 }
 
@@ -211,7 +207,8 @@ void DATE(void)
 		case 'D' | 'd':
 			bcm2835_i2c_begin();
 			bcm2835_i2c_setClockDivider(BCM2835_I2C_CLOCK_DIVIDER_2500);
-			//Psuedo Code Here: set I2C slave address to 0x68
+			//Psuedo Code Here: set I2C slave address to 0x68 (?)
+			bcm2835_i2c_setSlaveAddress(0x68);
 			bcm2835_i2c_read(DOM,*buffer);
 			char ones = *buffer[0] & 0x0F;
 			char tens = (*buffer[0] >> 4);
@@ -236,6 +233,21 @@ void DATE(void)
 			DATE();
 			break;
 	}
+}
+
+
+void tx(void) {
+    	bcm2835_i2c_begin();
+    	bcm2835_i2c_setClockDivider(BCM2835_I2C_CLOCK_DIVIDER_2500);
+	bcm2835_i2c_setSlaveAddress(0x68);
+	bcm2835_i2c_read(TEMP, *buffer);
+	char some = (*buffer[0] >> 2);
+	char something = (*buffer[0] >> 4);
+	uart_puts("\r\n");
+	uart_putc(some+48);
+	uart_putc(something+48);
+	uart_puts("\r\n");
+	bcm2835_i2c_end();
 }
 
 void TIME(void)
@@ -379,6 +391,9 @@ void ALARM(void)
 			bcm2835_i2c_setSlaveAddress(0x68);
 			uint32_t restore = mmio_read(0x20200010);
 			//Psuedo Code Here: Configure GPIO40 and 45 for PWM to the 3.5mm Audio Jack
+			mmio_write(0x20200010, 0x0);
+			bcm2835_gpio_fsel(RPI_V2_GPIO_P1_12, BCM2835_GPIO_FSEL_ALT0);
+			bcm2835_gpio_fsel(RPI_V2_GPIO_P1_13, BCM2835_GPIO_FSEL_ALT0);
 			mmio_write(BCM2835_GPIO_PWM + BCM2835_PWM_CONTROL, 0x0);//Disable PWM
 			mmio_write(BCM2835_CLOCK_BASE + BCM2835_PWMCLK_CNTL, 0x5A000020); //Stop the PWM clock
 			bcm2835_delayMicroseconds(110);//Long Wait for PWMCLK to settle
@@ -464,11 +479,12 @@ void VFP11(void) //ARM Vector Floating Point Unit Demo
 void command(void)
 {
 	uart_puts("\r\n");
-	//uart_puts(MS3);
+	uart_puts(MS3);
 	uint8_t c = '\0';
-	while(c == '\0') {
-	    c = read_char_buffer();
+	while (c == '\0') {
+		c = read_char_buffer();
 	}
+	uart_putc(c);
 	switch (c) {
 		case 'D' | 'd':
 			DATE();   //DATE command is demo’d
@@ -488,7 +504,10 @@ void command(void)
 		case 'V' | 'v':
 			VFP11();    //Vector Floating Point Calculator is demo’d
 			break;
-
+		case 'X' | 'x':
+		        uart_puts("T(x)");
+			tx();
+			break;
 		//Psuedo Code Here: Include the T(x) command for transmitting a large string to Teraterm using Tx interrupt system
 
 		default:
@@ -505,26 +524,17 @@ int logon(void)
 
 void kernel_main() 
 {
-	uart_puts("\r\npoop 1\r\n");
 	uart_init();
-	uart_puts("\r\npoop 2\r\n");
 	enable_irq_57();
-	uart_puts("\r\npoop 3\r\n");
 	enable_irq_52();
-	uart_puts("\r\npoop 4\r\n");
 	enable_1hz();
-	uart_puts("\r\npoop 5\r\n");
 	enable_arm_irq();
-	uart_puts("\r\npoop 6\r\n");
 //	if (logon() == 0) while (1) {}
 	banner();
-	uart_puts("\r\npoop 7\r\n");
 	HELP();
-	uart_puts("\r\npoop 8\r\n");
 	while (1) {
 	    command();
 	}
-	uart_puts("\r\nend while\r\n");
 }
 
 void irq_handler(void)
@@ -537,17 +547,15 @@ void irq_handler(void)
 
 	if ((pending & 0x800000) == 0x800000)  //did the reset button cause the interrupt
 	{
-	   uart_puts("\r\nreboot\r\n");	
 	   reboot();	//if so then warm boot
 	}
 	else if ((pending & 0x1000000) == 0x1000000)
 	{
-           uart_puts("\r\ncommandline\r\n");
 	   displaycommandline();  // if so then update commandline prompt
 	}
 	else
 	{
-	   *cbuf = uart_readc(); // if not those then must have been the keyboard
+	   cbuf = uart_readc(); // if not those then must have been the keyboard
 	}
 }
 
