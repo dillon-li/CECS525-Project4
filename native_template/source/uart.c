@@ -172,7 +172,7 @@ void uart_init()
     // Engineer the Interrupt for UART0 Receive // D: save state here somehow. I think he does something similar elsewhere in the code
     //mmio_write(UART0_IMSC, 0x0010);
 
-    mmio_write(UART0_IFLS, IFSL_RX_1_2 | IFSL_TX_1_2);
+    //mmio_write(UART0_IFLS, IFSL_RX_1_2 | IFSL_TX_1_2);
 
     mmio_write(UART0_IMSC, (1 << 1) | (1 << 4) | /*(1 << 5) |*/ (1 << 6) 
 			   /*| (1 << 7) | (1 << 8) | (1 << 9) | (1 << 10)*/);

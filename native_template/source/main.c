@@ -237,17 +237,7 @@ void DATE(void)
 
 
 void tx(void) {
-    	bcm2835_i2c_begin();
-    	bcm2835_i2c_setClockDivider(BCM2835_I2C_CLOCK_DIVIDER_2500);
-	bcm2835_i2c_setSlaveAddress(0x68);
-	bcm2835_i2c_read(TEMP, *buffer);
-	char some = (*buffer[0] >> 2);
-	char something = (*buffer[0] >> 4);
-	uart_puts("\r\n");
-	uart_putc(some+48);
-	uart_putc(something+48);
-	uart_puts("\r\n");
-	bcm2835_i2c_end();
+    	uart_puts("\r\nIn tx()\r\n");
 }
 
 void TIME(void)
@@ -458,7 +448,67 @@ void HELP(void) //Command List
 
 
 void displaycommandline(void)
-{ 
+{ 	
+	//date
+	bcm2835_i2c_begin();
+	bcm2835_i2c_setClockDivider(BCM2835_I2C_CLOCK_DIVIDER_2500);
+	//Psuedo Code Here: set I2C slave address to 0x68 (?)
+	bcm2835_i2c_setSlaveAddress(0x68);
+	bcm2835_i2c_read(DOM,*buffer);
+	char ones = *buffer[0] & 0x0F;
+	char tens = (*buffer[0] >> 4);
+	uart_putc(tens+48);
+	uart_putc(ones+48);
+	bcm2835_i2c_read(MONTH,*buffer);
+	ones = *buffer[0] & 0x0F;
+	tens = (*buffer[0] >> 4);
+	uart_putc('/');
+	uart_putc(tens+48);
+	uart_putc(ones+48);
+	bcm2835_i2c_read(YEAR,*buffer);
+	ones = *buffer[0] & 0x0F;
+	tens = (*buffer[0] >> 4);
+	uart_putc('/');
+	uart_putc(tens+48);
+	uart_putc(ones+48);	
+	bcm2835_i2c_end();
+	uart_puts(":");
+	//time
+	bcm2835_i2c_begin();
+	bcm2835_i2c_setClockDivider(BCM2835_I2C_CLOCK_DIVIDER_2500);
+	bcm2835_i2c_setSlaveAddress(0x68);
+	bcm2835_i2c_read(HRS,*buffer);
+	ones = *buffer[0] & 0x0F;
+	tens = (*buffer[0] >> 4);
+	uart_putc(tens+48);
+	uart_putc(ones+48);
+	bcm2835_i2c_read(MINS,*buffer);
+	ones = *buffer[0] & 0x0F;
+	tens = (*buffer[0] >> 4);
+	uart_putc('-');
+	uart_putc(tens+48);
+	uart_putc(ones+48);
+	bcm2835_i2c_read(SECS,*buffer);
+	ones = *buffer[0] & 0x0F;
+	tens = (*buffer[0] >> 4);
+	uart_putc('-');
+	uart_putc(tens+48);
+	uart_putc(ones+48);	
+	//Psuedo Code Here: End the i2c communication
+
+	//temp
+	uart_puts(":");
+	bcm2835_i2c_begin();
+    	bcm2835_i2c_setClockDivider(BCM2835_I2C_CLOCK_DIVIDER_2500);
+	bcm2835_i2c_setSlaveAddress(0x68);
+	bcm2835_i2c_read(TEMP, *buffer);
+	char some = (*buffer[0] >> 2);
+	char something = (*buffer[0] >> 4);
+	//uart_puts("\r\n");
+	uart_putc(some+48);
+	uart_putc(something+48);
+	uart_puts("\r\n");
+	bcm2835_i2c_end();
 	//Engineer the code here to display the active MM/DD/YY:HOURS-MINUTES-SECONDS:TEMPERATURE> command line prompt.
 }
 
@@ -532,6 +582,7 @@ void kernel_main()
 //	if (logon() == 0) while (1) {}
 	banner();
 	HELP();
+	displaycommandline();
 	while (1) {
 	    command();
 	}
