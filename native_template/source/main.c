@@ -56,6 +56,7 @@ void falling_edge(uint8_t);
 extern int invar;               //assembly variables
 extern int outvar;
 void displaycommandline();
+void ALARM();
 
 
 
@@ -119,9 +120,14 @@ void enable_1hz(void)
 char read_char_buffer(void)
 {
 	uint8_t c = '\0';
+	/*if(cbuf != '\0'){
+	    uart_puts("alarm");
+	    //call alarm
+	    ALARM();
+	}*/
 	while (c == '\0') {c = *cbuf;}
 	//Psuedo Code Here: make cbuf = null
-	cbuf = NULL; //prolly not gonna work but who knows //it didn't work
+	*cbuf = '\0'; //prolly not gonna work but who knows //it didn't work
 	//uart_puts(null);
 	return c;
 }
@@ -443,7 +449,12 @@ void displaycommandline(void)
 
 void VFP11(void) //ARM Vector Floating Point Unit Demo
 {
-    
+    uart_puts("\r\nCalculator Menu\r\n");
+    uart_puts("\r\n1. Addition\r\n");
+    uart_puts("\r\n2. Subtraction\r\n");
+    uart_puts("\r\n3. Multiplication\r\n");
+    uart_puts("\r\n4. Division\r\n");
+    uart_puts("\r\n9. Quit\r\n");
     //Engineer the VFP11 math coprocessor application here.
     //Send a menu to hyperterminal as was done with the minimal computer
     //FADD, FSUB, FMUL, and FDIV, and any other functions you wish to implement in ARM assembly routines in the boot.s file.
@@ -455,9 +466,9 @@ void command(void)
 	uart_puts("\r\n");
 	//uart_puts(MS3);
 	uint8_t c = '\0';
-	c = read_char_buffer();
-	uart_puts("The below poster is a chupacabra");
-	uart_putc(c);
+	while(c == '\0') {
+	    c = read_char_buffer();
+	}
 	switch (c) {
 		case 'D' | 'd':
 			DATE();   //DATE command is demo’d
@@ -518,7 +529,7 @@ void kernel_main()
 
 void irq_handler(void)
 {
-	uart_puts("\r\nIRQ HANDLER\r\n");
+	//uart_puts("\r\nIRQ HANDLER\r\n");
 	//re-engineer this irq_handler to handle the four interrupts as described in the project 4 document (reset button, 1HZ command line, Rx, Tx)
 
 	uint32_t pending = mmio_read(0x20200040); //read all gpio interrupt flags
@@ -536,10 +547,7 @@ void irq_handler(void)
 	}
 	else
 	{
-	   uart_puts("\r\nread\r\n");
-	   //uart_puts(cbuf); // which one prints
 	   *cbuf = uart_readc(); // if not those then must have been the keyboard
-	   //uart_putc(uart_readc()); // which one prints
 	}
 }
 

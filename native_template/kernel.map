@@ -24,7 +24,7 @@ LOAD build/main.o
 LOAD build/i2c.o
                 0x00000000                . = 0x0
 
-.text           0x00000000     0xa46c
+.text           0x00000000     0xa490
  *(.text)
  .text          0x00000000     0x8104 build/boot.o
                 0x00000000                vectors
@@ -59,95 +59,95 @@ LOAD build/i2c.o
                 0x00008950                bcm2835_gpio_pud
                 0x00008990                bcm2835_gpio_pudclk
                 0x00008a0c                bcm2835_gpio_set_pud
- .text          0x00008a7c     0x16c4 build/main.o
+ .text          0x00008a7c     0x16e8 build/main.o
                 0x00008ae8                falling_edge
                 0x00008b58                enable_irq_57
                 0x00008b74                disable_irq_57
                 0x00008b90                enable_irq_52
                 0x00008bec                enable_1hz
                 0x00008c64                read_char_buffer
-                0x00008cbc                banner
-                0x00008ce0                BCDtoUint8
-                0x00008d38                DATE
-                0x0000931c                TIME
-                0x00009934                ALARM
-                0x00009ea8                RES
-                0x00009eb8                HELP
-                0x00009ed0                displaycommandline
-                0x00009ee4                VFP11
-                0x00009ef8                command
-                0x00009ff4                logon
-                0x0000a00c                kernel_main
-                0x0000a098                irq_handler
- .text          0x0000a140      0x32c build/i2c.o
-                0x0000a140                bcm2835_i2c_begin
-                0x0000a164                bcm2835_i2c_end
-                0x0000a188                bcm2835_i2c_setSlaveAddress
-                0x0000a1c8                bcm2835_i2c_setClockDivider
-                0x0000a208                bcm2835_i2c_write
-                0x0000a2d8                bcm2835_i2c_read
+                0x00008cc0                banner
+                0x00008ce4                BCDtoUint8
+                0x00008d3c                DATE
+                0x00009320                TIME
+                0x00009938                ALARM
+                0x00009eac                RES
+                0x00009ebc                HELP
+                0x00009ed4                displaycommandline
+                0x00009ee8                VFP11
+                0x00009f3c                command
+                0x0000a030                logon
+                0x0000a048                kernel_main
+                0x0000a0d4                irq_handler
+ .text          0x0000a164      0x32c build/i2c.o
+                0x0000a164                bcm2835_i2c_begin
+                0x0000a188                bcm2835_i2c_end
+                0x0000a1ac                bcm2835_i2c_setSlaveAddress
+                0x0000a1ec                bcm2835_i2c_setClockDivider
+                0x0000a22c                bcm2835_i2c_write
+                0x0000a2fc                bcm2835_i2c_read
 
-.glue_7         0x0000a46c        0x0
+.glue_7         0x0000a490        0x0
  .glue_7        0x00000000        0x0 linker stubs
 
-.glue_7t        0x0000a46c        0x0
+.glue_7t        0x0000a490        0x0
  .glue_7t       0x00000000        0x0 linker stubs
 
-.vfp11_veneer   0x0000a46c        0x0
+.vfp11_veneer   0x0000a490        0x0
  .vfp11_veneer  0x00000000        0x0 linker stubs
 
-.v4_bx          0x0000a46c        0x0
+.v4_bx          0x0000a490        0x0
  .v4_bx         0x00000000        0x0 linker stubs
 
-.iplt           0x0000a46c        0x0
+.iplt           0x0000a490        0x0
  .iplt          0x00000000        0x0 build/boot.o
 
-.rodata         0x0000a46c      0x510
+.rodata         0x0000a490      0x53c
  *(.rodata)
- .rodata        0x0000a46c      0x510 build/main.o
-                0x0000a46c                MS1
-                0x0000a488                MS2
-                0x0000a4c0                MS3
-                0x0000a4cc                MS4
+ .rodata        0x0000a490      0x53c build/main.o
+                0x0000a490                MS1
+                0x0000a4ac                MS2
+                0x0000a4e4                MS3
+                0x0000a4f0                MS4
 
-.rel.dyn        0x0000a97c        0x0
+.rel.dyn        0x0000a9cc        0x0
  .rel.iplt      0x00000000        0x0 build/boot.o
 
-.data           0x0000a97c      0x340
+.data           0x0000a9cc      0x340
  *(.data)
- .data          0x0000a97c        0x0 build/boot.o
- .data          0x0000a97c        0x0 build/uart.o
- .data          0x0000a97c        0x0 build/bcm2835.o
- .data          0x0000a97c      0x33c build/main.o
-                0x0000a97c                N
-                0x0000ac9c                bcm2835_gpio
-                0x0000aca0                bcm2835_clk
-                0x0000aca4                bcm2835_pads
-                0x0000aca8                bcm2835_spi0
-                0x0000acac                bcm2835_bsc0
-                0x0000acb0                bcm2835_bsc1
-                0x0000acb4                bcm2835_st
- .data          0x0000acb8        0x4 build/i2c.o
+ .data          0x0000a9cc        0x0 build/boot.o
+ .data          0x0000a9cc        0x0 build/uart.o
+ .data          0x0000a9cc        0x0 build/bcm2835.o
+ .data          0x0000a9cc      0x33c build/main.o
+                0x0000a9cc                N
+                0x0000acec                bcm2835_gpio
+                0x0000acf0                bcm2835_clk
+                0x0000acf4                bcm2835_pads
+                0x0000acf8                bcm2835_spi0
+                0x0000acfc                bcm2835_bsc0
+                0x0000ad00                bcm2835_bsc1
+                0x0000ad04                bcm2835_st
+ .data          0x0000ad08        0x4 build/i2c.o
 
-.igot.plt       0x0000acbc        0x0
+.igot.plt       0x0000ad0c        0x0
  .igot.plt      0x00000000        0x0 build/boot.o
 
-.bss            0x0000acbc       0x20
+.bss            0x0000ad0c       0x20
  *(.bss)
- .bss           0x0000acbc        0x0 build/boot.o
- .bss           0x0000acbc        0x0 build/uart.o
- .bss           0x0000acbc        0x0 build/bcm2835.o
- .bss           0x0000acbc        0x4 build/main.o
-                0x0000acbc                cbuf
- .bss           0x0000acc0        0x0 build/i2c.o
- COMMON         0x0000acc0       0x1c build/main.o
-                0x0000acc0                ones
-                0x0000acc4                ISCN
-                0x0000acc8                rbuf
-                0x0000accc                alarm
-                0x0000acd0                buffer
-                0x0000acd4                tens
-                0x0000acd8                tbuf
+ .bss           0x0000ad0c        0x0 build/boot.o
+ .bss           0x0000ad0c        0x0 build/uart.o
+ .bss           0x0000ad0c        0x0 build/bcm2835.o
+ .bss           0x0000ad0c        0x4 build/main.o
+                0x0000ad0c                cbuf
+ .bss           0x0000ad10        0x0 build/i2c.o
+ COMMON         0x0000ad10       0x1c build/main.o
+                0x0000ad10                ones
+                0x0000ad14                ISCN
+                0x0000ad18                rbuf
+                0x0000ad1c                alarm
+                0x0000ad20                buffer
+                0x0000ad24                tens
+                0x0000ad28                tbuf
 OUTPUT(build/output.elf elf32-littlearm)
 
 .ARM.attributes
