@@ -69,6 +69,36 @@ volatile uint32_t* bcm2835_bsc0 = (uint32_t*)BCM2835_BSC0_BASE;//for later updat
 volatile uint32_t* bcm2835_bsc1 = (uint32_t*)BCM2835_BSC1_BASE;
 volatile uint32_t* bcm2835_st = (uint32_t*)BCM2835_ST_BASE;
 
+// The Beep
+void beep()
+{
+	bcm2835_i2c_begin();
+			bcm2835_i2c_setClockDivider(BCM2835_I2C_CLOCK_DIVIDER_2500);
+			bcm2835_i2c_setSlaveAddress(0x68);
+			uint32_t restore = mmio_read(0x20200010);
+			//Psuedo Code Here: Configure GPIO40 and 45 for PWM to the 3.5mm Audio Jack
+			mmio_write(0x20200010, 0x0);
+			bcm2835_gpio_fsel(40, BCM2835_GPIO_FSEL_ALT0);
+			bcm2835_gpio_fsel(45, BCM2835_GPIO_FSEL_ALT0);
+			mmio_write(BCM2835_GPIO_PWM + BCM2835_PWM_CONTROL, 0x0);//Disable PWM
+			mmio_write(BCM2835_CLOCK_BASE + BCM2835_PWMCLK_CNTL, 0x5A000020); //Stop the PWM clock
+			bcm2835_delayMicroseconds(110);//Long Wait for PWMCLK to settle
+			while ((mmio_read(BCM2835_CLOCK_BASE + BCM2835_PWMCLK_CNTL) & 0x80 != 0)) bcm2835_delayMicroseconds(1);//Wait until clock does stop
+			mmio_write(BCM2835_CLOCK_BASE + BCM2835_PWMCLK_DIV, 0x5A001000);//Set the PWM clock divder to 1.
+			mmio_write(BCM2835_CLOCK_BASE + BCM2835_PWMCLK_CNTL, 0x5A000011);//Enable the PWM clock, make it the 19.2MHZ osc / divider.
+			mmio_write(BCM2835_GPIO_PWM + BCM2835_PWM0_RANGE, 96);//Range0 for left channel is the Cycle Time or Frequency = 1/cycle time
+			mmio_write(BCM2835_GPIO_PWM + BCM2835_PWM1_RANGE, 96);//Range0 for Right channel is the Cycle Time or Frequency = 1/cycle time	
+			mmio_write(BCM2835_GPIO_PWM + BCM2835_PWM0_DATA, 0);//Data0 is the Duty Cycle for the left channel
+			mmio_write(BCM2835_GPIO_PWM + BCM2835_PWM1_DATA, 0);//Data1 is the Duty Cycle for the right channel
+			mmio_write(BCM2835_GPIO_PWM + BCM2835_PWM_CONTROL, BCM2835_PWM0_ENABLE);//turn on left channel
+			mmio_write(BCM2835_GPIO_PWM + BCM2835_PWM_CONTROL, BCM2835_PWM1_ENABLE);//turn on right channel
+		
+			bcm2835_i2c_end();
+			mmio_write(BCM2835_GPIO_PWM + BCM2835_PWM0_DATA, 0);//No modulation
+			mmio_write(BCM2835_GPIO_PWM + BCM2835_PWM1_DATA, 0);//No modulation
+			mmio_write(BCM2835_GPIO_PWM + BCM2835_PWM_CONTROL, 0x0);//Disable PWM
+			mmio_write(0x20200010, restore);//restore GPIO40 and 45
+}
 
 void falling_edge(uint8_t pin)
 {
@@ -119,15 +149,14 @@ char read_char_buffer(void)
 	uart_puts("");
 	volatile uint32_t* control = bcm2835_bsc1 + BCM2835_BSC_C/4;
 	uint8_t c = '\0';
-	/*if(cbuf != '\0'){
+	if(cbuf != '\0'){
 	    uart_puts("alarm");
 	    //call alarm
-	    ALARM();
-	}*/
+	    beep();
+	}
 	while (c == '\0') {c = cbuf;}
 	uart_puts("");
-	//Psuedo Code Here: make cbuf = null
-	cbuf = '\0'; //prolly not gonna work but who knows //it didn't work
+	cbuf = '\0'; 
 	bcm2835_peri_set_bits(control, BCM2835_BSC_C_CLEAR_1 , BCM2835_BSC_C_CLEAR_1 );
 	return c;
 }
@@ -241,7 +270,8 @@ void DATE(void)
 
 
 void tx(void) {
-    	uart_puts("\r\nIn tx()\r\n");
+    	//uart_puts("\r\nIn tx()\r\n");
+	uart_puts("\r\nreally long string\r\n");
 }
 
 void TIME(void)
@@ -559,7 +589,7 @@ void command(void)
 			VFP11();    //Vector Floating Point Calculator is demo’d
 			break;
 		case 'X' | 'x':
-		        uart_puts("T(x)");
+		        //uart_puts("T(x)");
 			tx();
 			break;
 		//Psuedo Code Here: Include the T(x) command for transmitting a large string to Teraterm using Tx interrupt system
@@ -567,13 +597,25 @@ void command(void)
 		default:
 			if (c != 'q') uart_puts(MS4);
 			HELP();
+			displaycommandline();
 			break;
 	}
 }
 
 int logon(void)
 {
-	//Engineer your 3 attempt LOGON code here
+	uint8_t c = '\0';
+	uart_puts("Username: ");
+	c = read_char_buffer();
+	if (c == 's' | c == 'S') {
+	c = read_char_buffer();
+	uart_putc(c);
+	if (c == 't' | c == 'T') {
+		uart_putc(c);
+		uart_puts("xD");
+		//c = read_char_buffer();
+	}
+	}
 }
 
 void kernel_main() 
@@ -583,7 +625,7 @@ void kernel_main()
 	enable_irq_52();
 	enable_1hz();
 	enable_arm_irq();
-//	if (logon() == 0) while (1) {}
+	//if (logon() == 0) while (1) {}
 	banner();
 	HELP();
 	//displaycommandline(); //works
