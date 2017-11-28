@@ -15,12 +15,12 @@ void bcm2835_i2c_begin(void)
 {
 	//RPI Model B Version 1	
     // Set the I2C/BSC0 pins to the Alt 0 function to enable I2C access on them
-   // bcm2835_gpio_fsel(RPI_GPIO_P1_03, BCM2835_GPIO_FSEL_ALT0); // SDA
-   // bcm2835_gpio_fsel(RPI_GPIO_P1_05, BCM2835_GPIO_FSEL_ALT0); // SCL
+    //bcm2835_gpio_fsel(RPI_GPIO_P1_03, BCM2835_GPIO_FSEL_ALT0); // SDA
+    //bcm2835_gpio_fsel(RPI_GPIO_P1_05, BCM2835_GPIO_FSEL_ALT0); // SCL
 	
 	//RPI MODEL B Version 2	
     // Set the I2C/BSC1 pins to the Alt 0 function to enable I2C access on them
-    bcm2835_gpio_fsel(RPI_V2_GPIO_P1_03, BCM2835_GPIO_FSEL_ALT0); // SDA
+    bcm2835_gpio_fsel(RPI_V2_GPIO_P1_03, BCM2835_GPIO_FSEL_ALT0); // SDA //changing from version 2 to version 1 messed up display for date and time
     bcm2835_gpio_fsel(RPI_V2_GPIO_P1_05, BCM2835_GPIO_FSEL_ALT0); // SCL
 }
 
@@ -28,8 +28,8 @@ void bcm2835_i2c_end(void)
 {
 	//RPI Model B Version 1
     // Set all the I2C/BSC0 pins back to input
-   // bcm2835_gpio_fsel(RPI_GPIO_P1_03, BCM2835_GPIO_FSEL_INPT); // SDA
-   // bcm2835_gpio_fsel(RPI_GPIO_P1_05, BCM2835_GPIO_FSEL_INPT); // SCL
+    //bcm2835_gpio_fsel(RPI_GPIO_P1_03, BCM2835_GPIO_FSEL_INPT); // SDA
+    //bcm2835_gpio_fsel(RPI_GPIO_P1_05, BCM2835_GPIO_FSEL_INPT); // SCL
 
 
 	//RPI Model B Version 2

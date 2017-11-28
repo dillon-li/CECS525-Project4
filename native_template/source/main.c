@@ -116,6 +116,8 @@ void enable_1hz(void)
 
 char read_char_buffer(void)
 {
+	uart_puts("");
+	volatile uint32_t* control = bcm2835_bsc1 + BCM2835_BSC_C/4;
 	uint8_t c = '\0';
 	/*if(cbuf != '\0'){
 	    uart_puts("alarm");
@@ -123,8 +125,10 @@ char read_char_buffer(void)
 	    ALARM();
 	}*/
 	while (c == '\0') {c = cbuf;}
+	uart_puts("");
 	//Psuedo Code Here: make cbuf = null
 	cbuf = '\0'; //prolly not gonna work but who knows //it didn't work
+	bcm2835_peri_set_bits(control, BCM2835_BSC_C_CLEAR_1 , BCM2835_BSC_C_CLEAR_1 );
 	return c;
 }
 
@@ -531,9 +535,9 @@ void command(void)
 	uart_puts("\r\n");
 	uart_puts(MS3);
 	uint8_t c = '\0';
-	while (c == '\0') {
-		c = read_char_buffer();
-	}
+	//while (c == '\0') {
+	c = read_char_buffer();
+	//}
 	uart_putc(c);
 	switch (c) {
 		case 'D' | 'd':
@@ -582,7 +586,7 @@ void kernel_main()
 //	if (logon() == 0) while (1) {}
 	banner();
 	HELP();
-	displaycommandline();
+	//displaycommandline(); //works
 	while (1) {
 	    command();
 	}
@@ -606,7 +610,9 @@ void irq_handler(void)
 	}
 	else
 	{
+	   uart_puts("");
 	   cbuf = uart_readc(); // if not those then must have been the keyboard
+	   uart_puts("");
 	}
 }
 
