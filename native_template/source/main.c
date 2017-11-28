@@ -108,7 +108,7 @@ void enable_1hz(void)
 	*ISCN[0] = 0x00;
 	// I2C address 0x68 is the DS3231
 	//mmio_write(0x68, 0x00000000);
-	mmio_write(0xE, 0x00000000);
+	mmio_write(0x0E, 0x00000000);
 	//Psuedo Code Here: clear the INTCN (TY ROCKEY) bit in the DS3231M Control register
 	bcm2835_delayMicroseconds(1000);
 	bcm2835_i2c_end();
@@ -386,8 +386,8 @@ void ALARM(void)
 			uint32_t restore = mmio_read(0x20200010);
 			//Psuedo Code Here: Configure GPIO40 and 45 for PWM to the 3.5mm Audio Jack
 			mmio_write(0x20200010, 0x0);
-			bcm2835_gpio_fsel(RPI_V2_GPIO_P1_12, BCM2835_GPIO_FSEL_ALT0);
-			bcm2835_gpio_fsel(RPI_V2_GPIO_P1_13, BCM2835_GPIO_FSEL_ALT0);
+			bcm2835_gpio_fsel(40, BCM2835_GPIO_FSEL_ALT0);
+			bcm2835_gpio_fsel(45, BCM2835_GPIO_FSEL_ALT0);
 			mmio_write(BCM2835_GPIO_PWM + BCM2835_PWM_CONTROL, 0x0);//Disable PWM
 			mmio_write(BCM2835_CLOCK_BASE + BCM2835_PWMCLK_CNTL, 0x5A000020); //Stop the PWM clock
 			bcm2835_delayMicroseconds(110);//Long Wait for PWMCLK to settle

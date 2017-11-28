@@ -1898,10 +1898,10 @@ Disassembly of section .text:
     9bb4:	e59f02f0 	ldr	r0, [pc, #752]	; 9eac <ALARM+0x560>
     9bb8:	e3a01000 	mov	r1, #0
     9bbc:	ebfffbaa 	bl	8a6c <mmio_write>
-    9bc0:	e3a00012 	mov	r0, #18
+    9bc0:	e3a00028 	mov	r0, #40	; 0x28
     9bc4:	e3a01004 	mov	r1, #4
     9bc8:	ebfffa6f 	bl	858c <bcm2835_gpio_fsel>
-    9bcc:	e3a0001b 	mov	r0, #27
+    9bcc:	e3a0002d 	mov	r0, #45	; 0x2d
     9bd0:	e3a01004 	mov	r1, #4
     9bd4:	ebfffa6c 	bl	858c <bcm2835_gpio_fsel>
     9bd8:	e59f02d0 	ldr	r0, [pc, #720]	; 9eb0 <ALARM+0x564>

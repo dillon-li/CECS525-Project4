@@ -33,7 +33,7 @@ enum
     UART0_FBRD   = (UART0_BASE + 0x28),
     UART0_LCRH   = (UART0_BASE + 0x2C),
     UART0_CR     = (UART0_BASE + 0x30),
-    UART0_IFLS   = (UART0_BASE + 0x34), // This should probably be IFSL
+    UART0_IFLS   = (UART0_BASE + 0x34),
     UART0_IMSC   = (UART0_BASE + 0x38),
     UART0_RIS    = (UART0_BASE + 0x3C),
     UART0_MIS    = (UART0_BASE + 0x40),
